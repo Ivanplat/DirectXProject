@@ -16,7 +16,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     OutputDebugString(a.c_str());
 
 
-    switch(msg){
+   /* switch(msg){
     case WM_CLOSE: PostQuitMessage(69); break;
     case WM_KEYDOWN: {
         if (wParam == 'F') {
@@ -37,7 +37,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         std::string s = oss.str().c_str();
         SetWindowText(hWnd,s.c_str());
     }
-    }
+    }*/
 
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }

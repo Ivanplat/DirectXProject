@@ -162,6 +162,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BaseTimer.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="BaseTimer.h" />
     <ClInclude Include="DIHeader.h" />
     <ClInclude Include="ExceptionHandler.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="resource.h" />
