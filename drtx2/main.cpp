@@ -57,6 +57,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow){
             {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
+                if (wnd.kbd.KeyIsPressed(VK_MENU)) {
+                    MessageBox(nullptr, "Something happening!", "Space key was pressed!", MB_OK | MB_ICONEXCLAMATION);
+                }
             }
         }
 
