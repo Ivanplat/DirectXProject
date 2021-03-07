@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include "WindowsMessageMap.h"
 #include <sstream>
-#include "Window.h"
+#include "App.h"
 
 /*                                                 DiretX12 project                                                    */
 /*  Author: Ivan Platonov                                                                                              */
@@ -46,54 +46,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow){
 
     try {
-        Window wnd(800, 300, "Ys");
-        //Window wnd2(800, 300, "Ys");
-
-        MSG msg = {};
-        BOOL gResult;
-        while (gResult = msg.message != WM_QUIT)
-        {
-            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-               
-                static int i = 0;
-                while (!wnd.mouse.isEmpty()) {
-                    const auto e = wnd.mouse.Read();
-                    switch (e.GetType()) {
-                   
-                    case Mouse::Event::Type::WheelUp:
-                    {
-                        i++;
-                        std::ostringstream oss;
-                        oss << "Up: " << i;
-                        wnd.SetTitle(oss.str());
-                    }break; case Mouse::Event::Type::WheelDown:
-                    {
-                        i--;
-                        std::ostringstream oss;
-                        oss << "Down: " << i;
-                        wnd.SetTitle(oss.str());
-                    }break;
-                   }
-                }
-
-
-
-
-
-
-            }
-        }
-
-
-        if (gResult == -1) {
-            return -1;
-        }
-        else {
-            return msg.wParam;
-        }
+        return App{}.Go();
     }
     catch (const ExceptionHandler& e) {
         MessageBox(nullptr, e.lwhat(), e.GetType(), MB_OK | MB_ICONEXCLAMATION );
