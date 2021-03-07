@@ -57,9 +57,33 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow){
             {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
-                if (wnd.kbd.KeyIsPressed(VK_MENU)) {
-                    MessageBox(nullptr, "Something happening!", "Space key was pressed!", MB_OK | MB_ICONEXCLAMATION);
+               
+                static int i = 0;
+                while (!wnd.mouse.isEmpty()) {
+                    const auto e = wnd.mouse.Read();
+                    switch (e.GetType()) {
+                   
+                    case Mouse::Event::Type::WheelUp:
+                    {
+                        i++;
+                        std::ostringstream oss;
+                        oss << "Up: " << i;
+                        wnd.SetTitle(oss.str());
+                    }break; case Mouse::Event::Type::WheelDown:
+                    {
+                        i--;
+                        std::ostringstream oss;
+                        oss << "Down: " << i;
+                        wnd.SetTitle(oss.str());
+                    }break;
+                   }
                 }
+
+
+
+
+
+
             }
         }
 
