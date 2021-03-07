@@ -1,9 +1,11 @@
 #include "Window.h"
 #include <string>
+#include <sstream>
+#include "resource.h"
 
 Window::WindowClass Window::WindowClass::wndClass;
 
-LPCWSTR Window::WindowClass::GetName() noexcept
+LPCSTR Window::WindowClass::GetName() noexcept
 {
 	return wndClassName;
 }
@@ -21,12 +23,12 @@ Window::WindowClass::WindowClass() noexcept : hInst(GetModuleHandle(nullptr)) {
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = GetInstance();
-	wc.hIcon = nullptr;
+	wc.hIcon = static_cast<HICON>(LoadImage(GetInstance(), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32,32,0));
 	wc.hCursor = nullptr;
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = GetName();
-	wc.hIconSm = nullptr;
+	wc.hIconSm = static_cast<HICON>(LoadImage(GetInstance(), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 16, 16, 0));
 	RegisterClassEx(&wc);
 }
 
@@ -35,7 +37,7 @@ Window::WindowClass::~WindowClass()
 	UnregisterClass(wndClassName, GetInstance());
 }
 
-Window::Window(int width, int height, const char* name) noexcept
+Window::Window(int width, int height, const char* name)
 {
 	RECT wr;
 	wr.left = 100;
@@ -43,12 +45,16 @@ Window::Window(int width, int height, const char* name) noexcept
 	wr.top = 100;
 	wr.bottom = height + wr.top;
 
-	std::string a = name;
-	std::wstring b(a.begin(), a.end());
-	LPCWSTR lName = b.c_str();
+
+	if (FAILED(AdjustWindowRect(&wr, WS_CAPTION || WS_MINIMIZEBOX | WS_SYSMENU, FALSE))) {
+		throw CHWND_LAST_EXCEPT();
+	}
 
 	AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
-	hWnd = CreateWindow(WindowClass::GetName(), lName, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top, nullptr, nullptr, WindowClass::GetInstance(), this);
+	hWnd = CreateWindow(WindowClass::GetName(), name, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top, nullptr, nullptr, WindowClass::GetInstance(), this);
+	if (!hWnd) {
+		throw CHWND_LAST_EXCEPT();
+	}
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
 
@@ -87,3 +93,50 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
+Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept : ExceptionHandler(line, file), hr(hr){}
+
+const LPCSTR Window::Exception::lwhat() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl << "[ERROR CODE]: " << GetErrorCode() << std::endl << "[DESCRIPTION]: " << GetErrorString() << std::endl << GetOriginString();
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+const char* Window::Exception::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl << "[ERROR CODE]: " << GetErrorCode() << std::endl << "[DESCRIPTION]: " << GetErrorString() << std::endl<<GetOriginString();
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+const LPCSTR Window::Exception::GetType() const noexcept
+{
+	return "Error";
+}
+
+std::string Window::Exception::TranslateErrorCode(HRESULT hr)
+{
+	char* pMsgBuf = nullptr;
+	DWORD nMsgLen = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&pMsgBuf), 0, nullptr);
+
+	if (nMsgLen == 0) { 
+		return "Unindefing error code";
+	}
+	std::string errorString = pMsgBuf;
+	LocalFree(pMsgBuf);
+	return errorString;
+}
+
+HRESULT Window::Exception::GetErrorCode() const noexcept
+{
+	return hr;
+}
+
+std::string Window::Exception::GetErrorString() const noexcept
+{
+	return TranslateErrorCode(hr);
+}
+

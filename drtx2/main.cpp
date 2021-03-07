@@ -13,25 +13,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     static WindowsMessageMap mm;
     std::string a = mm(msg, lParam, wParam).c_str();
-    std::wstring b(a.begin(), a.end());
-    LPCWSTR result = b.c_str();
-    OutputDebugString(result);
+    OutputDebugString(a.c_str());
 
 
     switch(msg){
     case WM_CLOSE: PostQuitMessage(69); break;
     case WM_KEYDOWN: {
         if (wParam == 'F') {
-            SetWindowText(hWnd, L"NewText");
+            SetWindowText(hWnd, "NewText");
         }break;
     }
     case WM_CHAR:
     {
         static std::string title;
         title.push_back(char(wParam));
-        std::wstring b(title.begin(), title.end());
-        LPCWSTR a = b.c_str();
-        SetWindowText(hWnd, a);;
+        SetWindowText(hWnd, title.c_str());;
     }
     case WM_LBUTTONDOWN:
     {
@@ -39,9 +35,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         std::ostringstream oss;
         oss << "(" << pt.x << "," << pt.y << ")";
         std::string s = oss.str().c_str();
-        std::wstring a(s.begin(), s.end());
-        LPCWSTR b = a.c_str();
-        SetWindowText(hWnd,b);
+        SetWindowText(hWnd,s.c_str());
     }
     }
 
@@ -51,26 +45,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow){
 
-    Window wnd(800, 300, "Ys");
-    Window wnd2(800, 300, "Ys");
+    try {
+        Window wnd(800, 300, "Ys");
+        //Window wnd2(800, 300, "Ys");
 
-    MSG msg = {};
-    BOOL gResult;
-    while (gResult = msg.message != WM_QUIT)
-    {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        MSG msg = {};
+        BOOL gResult;
+        while (gResult = msg.message != WM_QUIT)
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
+
+
+        if (gResult == -1) {
+            return -1;
+        }
+        else {
+            return msg.wParam;
         }
     }
-
-
-    if (gResult == -1) {
-        return -1;
+    catch (const ExceptionHandler& e) {
+        MessageBox(nullptr, e.lwhat(), e.GetType(), MB_OK | MB_ICONEXCLAMATION );
     }
-    else {
-        return msg.wParam;
+    catch (const std::exception& e) {
+        std::string a = e.what();
+        MessageBox(nullptr, a.c_str(), "Standart Exception", MB_OK | MB_ICONEXCLAMATION);
     }
+    catch (...) {
 
+        MessageBox(nullptr, "No details avaliable", "Standart Exception", MB_OK | MB_ICONEXCLAMATION);
+    }
 }
